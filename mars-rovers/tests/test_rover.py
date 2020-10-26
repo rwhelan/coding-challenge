@@ -46,3 +46,20 @@ class TestRover(unittest.TestCase):
             rover.Rover(10000, 500, "W", "MM"),
         ):
             self.assertRaises(rover.RoverOutOfBounds, r.land, p)
+
+    def test_rover_collision(self):
+        p = plateau.Plateau(4, 4)
+
+        r1 = rover.Rover(1, 0, "N", "MMRMRM")
+        r2 = rover.Rover(3, 3, "S", "MMMRMRM")
+
+        r1.land(p)
+        r2.land(p)
+
+        r1.run()
+
+        with self.assertRaises(rover.RoverCollision) as err:
+            r2.run()
+
+        self.assertEqual(err.exception.x, 2)
+        self.assertEqual(err.exception.y, 1)

@@ -46,6 +46,9 @@ class RoverError(Exception):
     def __init__(self, message="Rover Error"):
         self.message = message
 
+    def __str__(self):
+        return self.message
+
 
 class RoverOutOfBounds(RoverError):
     def __init__(self, message="Rover off plateau"):
@@ -57,13 +60,19 @@ class RoverNotLanded(RoverError):
         super(RoverNotLanded, self).__init__(message)
 
 
+class RoverCollision(RoverError):
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+        super(RoverCollision, self).__init__(f"Rovers have collided at X:{x} Y:{y}")
+
+
 class Rover:
     def __init__(self, x, y, direction, instructions):
         self.x = x
         self.y = y
         self.instructions = instructions
         self.compass = Compass(direction)
-
+        self.path_taken = []
         self.plateau = None
 
     def _validate_position(self):
@@ -78,6 +87,14 @@ class Rover:
 
         if self.y < 0:
             raise RoverOutOfBounds("Off plateau to the south")
+
+        for plateau_rover in self.plateau.all_rovers():
+            if (
+                plateau_rover.x == self.x
+                and plateau_rover.y == self.y
+                and plateau_rover is not self
+            ):
+                raise RoverCollision(self.x, self.y)
 
     def _move_forward(self):
         # fmt: off
@@ -98,10 +115,11 @@ class Rover:
 
     def land(self, plateau):
         self.plateau = plateau
+        self.plateau.add_rover(self)
         self._validate_position()
 
     def run(self):
-        path_taken = [(self.x, self.y, self.compass.heading)]
+        self.path_taken = [(self.x, self.y, self.compass.heading)]
 
         if not self.plateau:
             raise RoverNotLanded
@@ -114,7 +132,7 @@ class Rover:
 
         for i in self.instructions:
             ops[i.upper()]()
-            path_taken.append((self.x, self.y, self.compass.heading))
+            self.path_taken.append((self.x, self.y, self.compass.heading))
             self._validate_position()
 
-        return path_taken
+        return self.path_taken
