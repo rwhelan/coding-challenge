@@ -2,7 +2,7 @@
 
 ## Running and Testing
 
-There are two versions of the challenge runner. `run_basic.py` which will print the output as described in the and `run_display.py` which will print additional information about the run.
+There are two versions of the challenge runner. `run_basic.py` which will print the output as described in the [challenge description](CHALLENGE.md) and `run_display.py` which will print additional information about the run.
 
 Both take only a single argument which is the path to the file containing the mission plan to execute.
 
@@ -12,15 +12,15 @@ All of the mission files should be executable with either runner.
 
 ### Testing
 
-Tests exist in the [tests/](tests/) directory and utilize `unittest`. All the tests can be from the mars-rovers directory with: `python3 -m unittest discover -v -s tests/`
+Tests exist in the [tests/](tests/) directory and utilize `unittest`. All the tests can be run from the mars-rovers directory with: `python3 -m unittest discover -v -s tests/`
 
 ## Assumptions
 
-Some assumptions were made about not only the execution environment, but also the implention.
+Some assumptions were made about not only the execution environment, but also the implementation.
 
 ### Execution Assumptions
 
-- Python3 only. Development was done with version 3.8 specifically.
+- Python3 only. Development was done with CPython version 3.8 specifically.
 - Development and testing was done on a Linux desktop. Attempts were made to handle Windows line endings but the resources to test on Windows or OSX were not available. OSX should be a non-issue.
 
 ### Implementation Assumptions
@@ -49,4 +49,4 @@ The Plateau class is _very simple_. Its primary responsibility is keeping a list
 
 The Rover class is where most of the logic resides. It not only keeps track of where it is on the plateau (X and Y coordinates) but it also validates that it's still on the plateau after each move. As part of this validation, it also validates that it has not collided with any other rovers at rest on the plateau. If either of these happen, the appropriate exception is raised and the movement instruction parsing is stopped.
 
-The rover class also contains an instance of a Compass class. The compass is a finite-state machine simply used to keep track of the rover's heading. This was broken out into its own class to keep the rover logic simplifier; however, in its current design, it makes testing purely the rover logic more difficult.
+The rover class also contains an instance of a Compass class. The compass is a finite-state machine simply used to keep track of the rover's heading. This was broken out into its own class to keep the rover logic simpler; however, in its current design, it makes testing purely the rover logic more difficult.
