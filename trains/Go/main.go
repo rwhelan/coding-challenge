@@ -32,7 +32,7 @@ func newRoute(src, dst *Town, dist int) {
 	}
 }
 
-func parser(input string, index map[string]*Town) {
+func graphLoader(input string, index map[string]*Town) {
 	src, dst, dis := input[0], input[1], input[2]
 	distance, _ := strconv.Atoi(string(dis))
 
@@ -55,7 +55,7 @@ func main() {
 
 	for _, edge := range strings.Split(graphData, ",") {
 		edge := strings.Trim(edge, " ")
-		parser(edge, allTowns)
+		graphLoader(edge, allTowns)
 	}
 
 	for k, v := range allTowns {
