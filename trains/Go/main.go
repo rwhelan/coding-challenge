@@ -68,7 +68,7 @@ func main() {
 	}
 
 	// allPaths := make([][]*Town, 0, 10)
-	allPaths := walk([]*Town{allTowns["C"]}, allps)
+	allPaths := walk(&Path{Stops: []*Town{allTowns["C"]}}, allps)
 
 	fmt.Println("ALL :", allPaths)
 	for i, pth := range allPaths {
@@ -77,10 +77,10 @@ func main() {
 	}
 }
 
-func printPath(path []*Town) {
-	for _, t := range path {
+func printPath(path *Path) {
+	for _, t := range path.Stops {
 		fmt.Printf(" => %s", (*t).Name)
 	}
 
-	fmt.Println()
+	fmt.Printf("   Cost: %d\n", path.Cost)
 }

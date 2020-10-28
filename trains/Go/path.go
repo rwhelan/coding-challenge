@@ -2,9 +2,10 @@ package main
 
 import "fmt"
 
-// type Path struct {
-// 	Stops []*Town
-// }
+type Path struct {
+	Cost  int
+	Stops []*Town
+}
 
 // type OP uint
 
@@ -14,35 +15,35 @@ import "fmt"
 // 	STOP
 // )
 
-type contFunc func(p []*Town) []*Route
+type contFunc func(p *Path) []*Route
 
 // var (
 // 	allPaths [][]*Town
 // )
 
-func walk(p []*Town, f contFunc) [][]*Town {
+func walk(p *Path, f contFunc) []*Path {
 	cont := f(p)
 
 	if len(cont) == 0 {
-		return [][]*Town{
+		return []*Path{
 			p,
 		}
 	}
 
-	resp := make([][]*Town, 0)
+	resp := make([]*Path, 0)
 	for _, r := range cont {
-		np := append(p, r.Dst)
-		resp = append(resp, walk(np, f)...)
+		np := append(p.Stops, r.Dst)
+		resp = append(resp, walk(&Path{Stops: np, Cost: p.Cost + r.Distance}, f)...)
 	}
 
 	return resp
 }
 
-func allps(p []*Town) []*Route {
+func allps(p *Path) []*Route {
 	fmt.Println(p)
-	if len(p) > 4 {
+	if len(p.Stops) > 4 {
 		return []*Route{}
 	}
 
-	return p[len(p)-1].RouteList()
+	return p.Stops[len(p.Stops)-1].RouteList()
 }
