@@ -1,10 +1,16 @@
 package main
 
-import "fmt"
-
 type Path struct {
 	Cost  int
 	Stops []*Town
+}
+
+func (p *Path) CurrentNode() *Town {
+	if len(p.Stops) == 0 {
+		return nil
+	}
+
+	return p.Stops[len(p.Stops)-1]
 }
 
 // type OP uint
@@ -39,11 +45,42 @@ func walk(p *Path, f contFunc) []*Path {
 	return resp
 }
 
-func allps(p *Path) []*Route {
-	fmt.Println(p)
-	if len(p.Stops) > 4 {
-		return []*Route{}
+func finalDst(t *Town) contFunc {
+	return func(p *Path) []*Route {
+		if len(p.Stops) > 15 {
+			return nil
+		}
+
+		if p.CurrentNode() == t {
+			return nil
+		}
+
+		return DropLoopPaths(p)
+	}
+}
+
+//
+func DropLoopPaths(p *Path) []*Route {
+	resp := p.CurrentNode().RouteList()
+
+	for _, t := range p.Stops {
+		for _, r := range resp {
+			if r.Dst == t {
+				resp = removeRoute(resp, r)
+			}
+		}
 	}
 
-	return p.Stops[len(p.Stops)-1].RouteList()
+	return resp
+}
+
+func removeRoute(allr []*Route, r *Route) []*Route {
+	for i, cr := range allr {
+		if cr == r {
+			allr[i] = allr[len(allr)-1]
+			return allr[:len(allr)-1]
+		}
+	}
+
+	return allr
 }

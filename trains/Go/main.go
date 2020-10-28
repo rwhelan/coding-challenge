@@ -67,8 +67,8 @@ func main() {
 		graphLoader(edge, allTowns)
 	}
 
-	// allPaths := make([][]*Town, 0, 10)
-	allPaths := walk(&Path{Stops: []*Town{allTowns["C"]}}, allps)
+	// allPaths := walk(&Path{Stops: []*Town{allTowns["A"]}}, allps)
+	allPaths := walk(&Path{Stops: []*Town{allTowns["C"]}}, finalDst(allTowns["C"]))
 
 	fmt.Println("ALL :", allPaths)
 	for i, pth := range allPaths {
