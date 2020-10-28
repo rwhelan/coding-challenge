@@ -58,10 +58,20 @@ func main() {
 		graphLoader(edge, allTowns)
 	}
 
-	for k, v := range allTowns {
-		fmt.Printf("%s\n", k)
-		for _, t := range v.Routes {
-			fmt.Println("    ", t.Dst.Name)
-		}
+	allPaths = make([][]*Town, 0)
+
+	walk([]*Town{allTowns["C"]}, allTowns["C"], allps)
+
+	for i, pth := range allPaths {
+		fmt.Print(i)
+		printPath(pth)
 	}
+}
+
+func printPath(path []*Town) {
+	for _, t := range path {
+		fmt.Printf(" => %s", (*t).Name)
+	}
+
+	fmt.Println()
 }
