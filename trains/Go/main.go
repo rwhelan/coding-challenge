@@ -11,6 +11,15 @@ type Town struct {
 	Routes map[string]*Route
 }
 
+func (t *Town) RouteList() []*Route {
+	routes := make([]*Route, 0, len(t.Routes))
+	for _, r := range t.Routes {
+		routes = append(routes, r)
+	}
+
+	return routes
+}
+
 type Route struct {
 	Src      *Town
 	Dst      *Town
@@ -58,10 +67,10 @@ func main() {
 		graphLoader(edge, allTowns)
 	}
 
-	allPaths = make([][]*Town, 0)
+	// allPaths := make([][]*Town, 0, 10)
+	allPaths := walk([]*Town{allTowns["C"]}, allps)
 
-	walk([]*Town{allTowns["C"]}, allTowns["C"], allps)
-
+	fmt.Println("ALL :", allPaths)
 	for i, pth := range allPaths {
 		fmt.Print(i)
 		printPath(pth)

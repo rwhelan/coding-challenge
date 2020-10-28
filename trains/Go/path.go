@@ -6,45 +6,43 @@ import "fmt"
 // 	Stops []*Town
 // }
 
-type OP uint
+// type OP uint
 
-const (
-	DROP OP = 1 << iota
-	CONTINUE
-	STOP
-)
+// const (
+// 	DROP OP = 1 << iota
+// 	CONTINUE
+// 	STOP
+// )
 
-type contFunc func(p []*Town, current *Town) bool
+type contFunc func(p []*Town) []*Route
 
-var (
-	allPaths [][]*Town
-)
+// var (
+// 	allPaths [][]*Town
+// )
 
-func walk(p []*Town, current *Town, f contFunc) {
-	if f(p, current) {
-		np := append(p, current)
-		for _, r := range current.Routes {
-			walk(np, r.Dst, f)
+func walk(p []*Town, f contFunc) [][]*Town {
+	cont := f(p)
+
+	if len(cont) == 0 {
+		return [][]*Town{
+			p,
 		}
-	} else {
-		allPaths = append(allPaths, p)
 	}
+
+	resp := make([][]*Town, 0)
+	for _, r := range cont {
+		np := append(p, r.Dst)
+		resp = append(resp, walk(np, f)...)
+	}
+
+	return resp
 }
 
-func allps(p []*Town, current *Town) bool {
-	if len(p) < 3 {
-		return true
+func allps(p []*Town) []*Route {
+	fmt.Println(p)
+	if len(p) > 4 {
+		return []*Route{}
 	}
-	first := p[0]
-	last := p[len(p)-1]
 
-	fmt.Printf("FIRST: %s | LAST: %s | CURRNET: %s | PATH:",
-		first.Name, last.Name, current.Name)
-	printPath(p)
-
-	fmt.Printf("FIRST: %p | LAST: %p | NEXT: %p\n",
-		first, last, current)
-
-	return first != last
-
+	return p[len(p)-1].RouteList()
 }
