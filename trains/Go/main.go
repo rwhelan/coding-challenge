@@ -67,14 +67,25 @@ func main() {
 		graphLoader(edge, allTowns)
 	}
 
-	// allPaths := walk(&Path{Stops: []*Town{allTowns["A"]}}, allps)
-	//allPaths := make([]*Path, 0)
-	allPaths := walk(
-		&Path{Stops: []*Town{allTowns["C"]}}, DropLoopPaths,
+	allPaths := make([]*Path, 0)
+	walk(
+		&allPaths, &Path{Stops: []*Town{allTowns["A"]}}, SkipD,
 	)
 
-	fmt.Println("ALL :", allPaths)
+	allp := walkr(&Path{Stops: []*Town{allTowns["A"]}}, SkipD)
+
+	// allPaths := walk(
+	// 	&Path{Stops: []*Town{allTowns["A"]}}, SkipD,
+	// )
+
+	fmt.Println("ALL: ", allPaths)
 	for i, pth := range allPaths {
+		fmt.Print(i)
+		printPath(pth)
+	}
+
+	fmt.Println("AAL P: ", allp)
+	for i, pth := range allp {
 		fmt.Print(i)
 		printPath(pth)
 	}

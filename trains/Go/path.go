@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type Path struct {
 	Cost  int
 	Stops []*Town
@@ -27,8 +29,22 @@ type contFunc func(p *Path, next *Town) bool
 // 	allPaths [][]*Town
 // )
 
-func walk(p *Path, f contFunc) []*Path {
-	var resp []*Path
+func walk(allPaths *[]*Path, p *Path, f contFunc) {
+	for _, r := range p.CurrentTown().Routes {
+		if f(p, r.Dst) {
+			np := &Path{
+				Stops: append(p.Stops, r.Dst),
+				Cost:  p.Cost + r.Distance,
+			}
+			walk(allPaths, np, f)
+		} else {
+			*allPaths = append(*allPaths, p)
+		}
+	}
+}
+
+func walkr(p *Path, f contFunc) []*Path {
+	var allPaths []*Path
 
 	for _, r := range p.CurrentTown().Routes {
 		if f(p, r.Dst) {
@@ -36,48 +52,42 @@ func walk(p *Path, f contFunc) []*Path {
 				Stops: append(p.Stops, r.Dst),
 				Cost:  p.Cost + r.Distance,
 			}
-			resp = append(resp, walk(np, f)...)
+			allPaths = append(allPaths, walkr(np, f)...)
 		} else {
-			resp = append(resp, p)
+			allPaths = append(allPaths, p)
 		}
 	}
 
-	return resp
-
-	// if !f(p, next) {
-	// 	return []*Path{
-	// 		p,
-	// 	}
-	// } else {
-	// 	if next != nil {
-	// 		p.Stops = append(p.Stops, next)
-	// 	}
-	// 	resp := make([]*Path, 0)
-	// 	fmt.Println(p.CurrentTown(), p.Stops)
-	// 	for _, r := range p.CurrentTown().Routes {
-	// 		if next != nil {
-	// 			fmt.Printf("Currnet: %s Next: %s\n", p.CurrentTown().Name, r.Dst.Name)
-	// 		}
-	// 		resp = append(resp, walk(&Path{Stops: p.Stops, Cost: p.Cost + r.Distance}, r.Dst, f)...)
-	// 	}
-	// 	return resp
-	// }
+	return allPaths
 }
 
-func DropLoopPaths(p *Path, next *Town) bool {
-	if len(p.Stops) == 1 {
-		return true
+func SkipD(p *Path, next *Town) bool {
+	if pathContains(p, next) {
+		fmt.Println("Currnet: ", p.CurrentTown().Name, "Next: ", next.Name)
+		printPath(p)
+		fmt.Println("FALSE - Contains\n")
+		return false
+	}
+	if len(p.Stops) >= 10 {
+		fmt.Println("Currnet: ", p.CurrentTown().Name, "Next: ", next.Name)
+		printPath(p)
+		fmt.Println("FALSE - Len\n")
+		return false
 	}
 
-	for _, t := range p.Stops[:len(p.Stops)-1] {
-		if t == p.CurrentTown() {
-			return false
-		}
-	}
-
+	// fmt.Println("TRUE\n")
 	return true
-
 }
+
+// func DropLoopPaths(p *Path, next *Town) bool {
+// 	if len(p.Stops) == 1 {
+// 		return true
+// 	}
+
+// 	fmt.Println("CUrrnet: ", p.CurrentTown().Name, "Next: ", next.Name)
+// 	printPath(p)
+// 	return p.CurrentTown().Name != "C"
+// }
 
 func pathContains(p *Path, t *Town) bool {
 	for _, i := range p.Stops {
