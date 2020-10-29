@@ -67,28 +67,40 @@ func main() {
 		graphLoader(edge, allTowns)
 	}
 
-	allPaths := make([]*Path, 0)
-	walk(
-		&allPaths, &Path{Stops: []*Town{allTowns["A"]}}, SkipD,
-	)
+	// allPaths := make([]*Path, 0)
+	// walk(
+	// 	&allPaths, &Path{Stops: []*Town{allTowns["A"]}}, SkipD,
+	// )
 
-	allp := walkr(&Path{Stops: []*Town{allTowns["A"]}}, SkipD)
+	allp := make([]*Path, 0)
+	walk(&allp, &Path{Stops: []*Town{allTowns["C"]}}, SkipD)
 
 	// allPaths := walk(
 	// 	&Path{Stops: []*Town{allTowns["A"]}}, SkipD,
 	// )
 
-	fmt.Println("ALL: ", allPaths)
-	for i, pth := range allPaths {
-		fmt.Print(i)
-		printPath(pth)
-	}
+	// fmt.Println("ALL: ", allPaths)
+	// for i, pth := range allPaths {
+	// 	fmt.Print(i)
+	// 	printPath(pth)
+	// }
 
 	fmt.Println("AAL P: ", allp)
 	for i, pth := range allp {
 		fmt.Print(i)
 		printPath(pth)
 	}
+
+	fmt.Printf("OUTSIDE %p\n", &allp)
+	np := pathDeDup(allp)
+	fmt.Println(allp)
+	fmt.Println(np)
+
+	// fmt.Println("AAL ddup: ", np)
+	// for i, pth := range np {
+	// 	fmt.Print(i)
+	// 	printPath(pth)
+	// }
 }
 
 func printPath(path *Path) {
@@ -97,4 +109,51 @@ func printPath(path *Path) {
 	}
 
 	fmt.Printf("   Cost: %d\n", path.Cost)
+}
+
+func pathDeDup(allPaths []*Path) []*Path {
+	fmt.Printf("INSIDE %p\n", &allPaths)
+	pathsEqual := func(x, y *Path) bool {
+		if len(x.Stops) != len(y.Stops) {
+			return false
+		}
+
+		for i := 0; i < len(x.Stops)-1; i++ {
+			if x.Stops[i] != y.Stops[i] {
+				return false
+			}
+		}
+
+		// Assert Path Costs
+		if x.Cost != y.Cost {
+			printPath(x)
+			printPath(y)
+			panic("COSTS SHOULD MATCH")
+		}
+
+		return true
+	}
+
+	for i, p := range allPaths {
+		if p == nil {
+			continue
+		}
+		for x, y := range allPaths[i+1:] {
+			if y == nil {
+				continue
+			}
+			n := x + i + 1
+			if pathsEqual(p, y) {
+				allPaths[n] = nil
+			}
+		}
+	}
+
+	n := make([]*Path, 0)
+	for _, p := range allPaths {
+		if p != nil {
+			n = append(n, p)
+		}
+	}
+	return n
 }

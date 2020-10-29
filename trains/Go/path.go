@@ -15,78 +15,55 @@ func (p *Path) CurrentTown() *Town {
 	return p.Stops[len(p.Stops)-1]
 }
 
-// type OP uint
+// type contFunc func(p *Path, next *Town) bool
 
-// const (
-// 	DROP OP = 1 << iota
-// 	CONTINUE
-// 	STOP
-// )
+// func walk(allPaths *[]*Path, p *Path, f contFunc) {
+// 	for _, r := range p.CurrentTown().Routes {
+// 		if f(p, r.Dst) {
+// 			np := &Path{
+// 				Stops: append(p.Stops, r.Dst),
+// 				Cost:  p.Cost + r.Distance,
+// 			}
+// 			walk(allPaths, np, f)
+// 		} else {
+// 			*allPaths = append(*allPaths, p)
+// 		}
+// 	}
+// }
 
-type contFunc func(p *Path, next *Town) bool
+// func walkr(p *Path, f contFunc) []*Path {
+// 	var allPaths []*Path
 
-// var (
-// 	allPaths [][]*Town
-// )
-
-func walk(allPaths *[]*Path, p *Path, f contFunc) {
-	for _, r := range p.CurrentTown().Routes {
-		if f(p, r.Dst) {
-			np := &Path{
-				Stops: append(p.Stops, r.Dst),
-				Cost:  p.Cost + r.Distance,
-			}
-			walk(allPaths, np, f)
-		} else {
-			*allPaths = append(*allPaths, p)
-		}
-	}
-}
-
-func walkr(p *Path, f contFunc) []*Path {
-	var allPaths []*Path
-
-	for _, r := range p.CurrentTown().Routes {
-		if f(p, r.Dst) {
-			np := &Path{
-				Stops: append(p.Stops, r.Dst),
-				Cost:  p.Cost + r.Distance,
-			}
-			allPaths = append(allPaths, walkr(np, f)...)
-		} else {
-			allPaths = append(allPaths, p)
-		}
-	}
-
-	return allPaths
-}
-
-func SkipD(p *Path, next *Town) bool {
-	if pathContains(p, next) {
-		fmt.Println("Currnet: ", p.CurrentTown().Name, "Next: ", next.Name)
-		printPath(p)
-		fmt.Println("FALSE - Contains\n")
-		return false
-	}
-	if len(p.Stops) >= 10 {
-		fmt.Println("Currnet: ", p.CurrentTown().Name, "Next: ", next.Name)
-		printPath(p)
-		fmt.Println("FALSE - Len\n")
-		return false
-	}
-
-	// fmt.Println("TRUE\n")
-	return true
-}
-
-// func DropLoopPaths(p *Path, next *Town) bool {
-// 	if len(p.Stops) == 1 {
-// 		return true
+// 	for _, r := range p.CurrentTown().Routes {
+// 		if f(p, r.Dst) {
+// 			np := &Path{
+// 				Stops: append(p.Stops, r.Dst),
+// 				Cost:  p.Cost + r.Distance,
+// 			}
+// 			allPaths = append(allPaths, walkr(np, f)...)
+// 		} else {
+// 			allPaths = append(allPaths, p)
+// 		}
 // 	}
 
-// 	fmt.Println("CUrrnet: ", p.CurrentTown().Name, "Next: ", next.Name)
-// 	printPath(p)
-// 	return p.CurrentTown().Name != "C"
+// 	return allPaths
+// }
+
+// func SkipD(p *Path, next *Town) bool {
+// 	if pathContains(p, next) {
+// 		fmt.Println("Currnet: ", p.CurrentTown().Name, "Next: ", next.Name)
+// 		printPath(p)
+// 		fmt.Println("FALSE - Contains\n")
+// 		return false
+// 	}
+// 	if len(p.Stops) >= 10 {
+// 		fmt.Println("Currnet: ", p.CurrentTown().Name, "Next: ", next.Name)
+// 		printPath(p)
+// 		fmt.Println("FALSE - Len\n")
+// 		return false
+// 	}
+
+// 	return true
 // }
 
 func pathContains(p *Path, t *Town) bool {
@@ -99,42 +76,93 @@ func pathContains(p *Path, t *Town) bool {
 	return false
 }
 
-// func finalDst(t *Town) contFunc {
-// 	return func(p *Path) []*Route {
-// 		if len(p.Stops) > 15 {
-// 			return nil
-// 		}
+type contFunc func(p *Path, next *Town) *bool
 
-// 		if p.CurrentNode() == t {
-// 			return nil
-// 		}
-
-// 		return DropLoopPaths(p)
-// 	}
-// }
-
-// //
-// func DropLoopPaths(p *Path) []*Route {
-// 	resp := p.CurrentNode().RouteList()
-
-// 	for _, t := range p.Stops {
-// 		for _, r := range resp {
-// 			if r.Dst == t {
-// 				resp = removeRoute(resp, r)
+// func walk(allPaths *[]*Path, p *Path, f contFunc) {
+// 	for _, r := range p.CurrentTown().Routes {
+// 		if f(p, r.Dst) {
+// 			np := &Path{
+// 				Stops: append(p.Stops, r.Dst),
+// 				Cost:  p.Cost + r.Distance,
 // 			}
+// 			walk(allPaths, np, f)
+// 		} else {
+// 			*allPaths = append(*allPaths, p)
 // 		}
 // 	}
-
-// 	return resp
 // }
 
-// func removeRoute(allr []*Route, r *Route) []*Route {
-// 	for i, cr := range allr {
-// 		if cr == r {
-// 			allr[i] = allr[len(allr)-1]
-// 			return allr[:len(allr)-1]
-// 		}
-// 	}
+func walkr(p *Path, f contFunc) []*Path {
+	allPaths := []*Path{}
 
-// 	return allr
-// }
+	for _, r := range p.CurrentTown().Routes {
+		cont := f(p, r.Dst)
+		if cont == nil {
+			continue
+		}
+
+		if *cont {
+			np := &Path{
+				Stops: append(p.Stops, r.Dst),
+				Cost:  p.Cost + r.Distance,
+			}
+			allPaths = append(allPaths, walkr(np, f)...)
+
+		} else {
+			allPaths = append(allPaths, p)
+		}
+	}
+
+	return allPaths
+}
+
+func walk(allPaths *[]*Path, p *Path, f contFunc) {
+	for _, r := range p.CurrentTown().Routes {
+		cont := f(p, r.Dst)
+		if cont == nil {
+			continue
+		}
+
+		if *cont {
+			np := &Path{
+				Stops: append(p.Stops, r.Dst),
+				Cost:  p.Cost + r.Distance,
+			}
+			walk(allPaths, np, f)
+
+		} else {
+			*allPaths = append(*allPaths, p)
+
+		}
+	}
+}
+
+func SkipD(p *Path, next *Town) *bool {
+	if len(p.Stops) == 1 {
+		return PathContinue()
+	}
+	if p.Cost >= 30 {
+		return PathDrop()
+	}
+	fmt.Println(p.CurrentTown().Name, next.Name)
+	printPath(p)
+	if p.CurrentTown().Name == "C" {
+		return PathStop()
+	}
+
+	return PathContinue()
+}
+
+func PathContinue() *bool {
+	t := true
+	return &t
+}
+
+func PathStop() *bool {
+	t := false
+	return &t
+}
+
+func PathDrop() *bool {
+	return nil
+}
