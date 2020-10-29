@@ -68,7 +68,10 @@ func main() {
 	}
 
 	// allPaths := walk(&Path{Stops: []*Town{allTowns["A"]}}, allps)
-	allPaths := walk(&Path{Stops: []*Town{allTowns["C"]}}, finalDst(allTowns["C"]))
+	//allPaths := make([]*Path, 0)
+	allPaths := walk(
+		&Path{Stops: []*Town{allTowns["C"]}}, DropLoopPaths,
+	)
 
 	fmt.Println("ALL :", allPaths)
 	for i, pth := range allPaths {
