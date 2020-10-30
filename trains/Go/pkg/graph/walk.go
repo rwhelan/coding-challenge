@@ -1,6 +1,22 @@
-package main
+package graph
+
+import (
+	"fmt"
+)
 
 type contFunc func(p *Path, next *Node) *bool
+
+func Walk(g *Graph, start *Node, f contFunc) (*PathList, error) {
+	pl := NewPathList()
+	startNode := g.GetNode(start.Name)
+	if startNode == nil {
+		return nil, fmt.Errorf("start node %s not found in graph %s", start.Name, g.Name)
+	}
+
+	walk(pl, &Path{Nodes: []*Node{startNode}}, f)
+
+	return pl, nil
+}
 
 func walkr(p *Path, f contFunc) *PathList {
 	all := NewPathList()
@@ -56,34 +72,4 @@ func walk(all *PathList, p *Path, f contFunc) {
 			}
 		}
 	}
-}
-
-func SkipD(p *Path, next *Node) *bool {
-	if len(p.Nodes) == 1 {
-		return PathContinue()
-	}
-	if p.Cost >= 30 {
-		return PathDrop()
-	}
-	//fmt.Println(p.CurrentNode().Name, next.Name)
-	//PrintPath(p)
-	if p.CurrentNode().Name == "C" {
-		return PathStop()
-	}
-
-	return PathContinue()
-}
-
-func PathContinue() *bool {
-	t := true
-	return &t
-}
-
-func PathStop() *bool {
-	t := false
-	return &t
-}
-
-func PathDrop() *bool {
-	return nil
 }
