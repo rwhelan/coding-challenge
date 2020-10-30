@@ -1,84 +1,73 @@
 package main
 
-type Path struct {
-	Cost  int
-	Stops []*Town
-}
+type contFunc func(p *Path, next *Node) *bool
 
-func (p *Path) CurrentTown() *Town {
-	if len(p.Stops) == 0 {
-		return nil
-	}
+func walkr(p *Path, f contFunc) *PathList {
+	all := NewPathList()
 
-	return p.Stops[len(p.Stops)-1]
-}
-
-type contFunc func(p *Path, next *Town) *bool
-
-func walkr(p *Path, f contFunc) []*Path {
-	allPaths := []*Path{}
-
-	for _, r := range p.CurrentTown().Routes {
-		cont := f(p, r.Dst)
+	for _, e := range p.CurrentNode().Edges {
+		cont := f(p, e.Dst)
 		if cont == nil {
 			continue
 		}
 
 		if *cont {
 			np := &Path{
-				Stops: append(p.Stops, r.Dst),
-				Cost:  p.Cost + r.Distance,
+				Nodes: append(p.Nodes, e.Dst),
+				Edges: append(p.Edges, e),
+				Cost:  p.Cost + e.Distance,
 			}
-			allPaths = append(allPaths, walkr(np, f)...)
+			all.Add(walkr(np, f))
 
 		} else {
 			// Dedup
-			if len(allPaths) == 0 ||
-				len(allPaths) >= 1 &&
-					!(allPaths[len(allPaths)-1] == p) {
-				allPaths = append(allPaths, p)
+			if all.Len() == 0 ||
+				all.Len() >= 1 &&
+					!(all.Last() == p) {
+				all.Append(p)
 			}
 		}
 	}
 
-	return allPaths
+	return all
 }
 
-func walk(allPaths *[]*Path, p *Path, f contFunc) {
-	for _, r := range p.CurrentTown().Routes {
-		cont := f(p, r.Dst)
+func walk(all *PathList, p *Path, f contFunc) {
+	for _, e := range p.CurrentNode().Edges {
+		cont := f(p, e.Dst)
 		if cont == nil {
 			continue
 		}
 
 		if *cont {
 			np := &Path{
-				Stops: append(p.Stops, r.Dst),
-				Cost:  p.Cost + r.Distance,
+				Nodes: append(p.Nodes, e.Dst),
+				Edges: append(p.Edges, e),
+				Cost:  p.Cost + e.Distance,
 			}
-			walk(allPaths, np, f)
+			walk(all, np, f)
 
 		} else {
 			// Dedup
-			if len(*allPaths) == 0 ||
-				len(*allPaths) >= 1 &&
-					!((*allPaths)[len(*allPaths)-1] == p) {
-				*allPaths = append(*allPaths, p)
+			if all.Len() == 0 ||
+				all.Len() >= 1 &&
+					!(all.Last() == p) {
+				all.Append(p)
 			}
 		}
 	}
 }
 
-func SkipD(p *Path, next *Town) *bool {
-	if len(p.Stops) == 1 {
+func SkipD(p *Path, next *Node) *bool {
+	if len(p.Nodes) == 1 {
 		return PathContinue()
 	}
 	if p.Cost >= 30 {
 		return PathDrop()
 	}
-	//fmt.Println(p.CurrentTown().Name, next.Name)
+	//fmt.Println(p.CurrentNode().Name, next.Name)
 	//PrintPath(p)
-	if p.CurrentTown().Name == "C" {
+	if p.CurrentNode().Name == "C" {
 		return PathStop()
 	}
 

@@ -6,81 +6,80 @@ import (
 	"strings"
 )
 
-type Town struct {
-	Name   string
-	Routes map[string]*Route
+type Node struct {
+	Name  string
+	Edges map[string]*Edge
 }
 
-func (t *Town) RouteList() []*Route {
-	routes := make([]*Route, 0, len(t.Routes))
-	for _, r := range t.Routes {
-		routes = append(routes, r)
+func (t *Node) EdgeList() []*Edge {
+	Edges := make([]*Edge, 0, len(t.Edges))
+	for _, r := range t.Edges {
+		Edges = append(Edges, r)
 	}
 
-	return routes
+	return Edges
 }
 
-type Route struct {
-	Src      *Town
-	Dst      *Town
+type Edge struct {
+	Src      *Node
+	Dst      *Node
 	Distance int
 }
 
-func newTown(name string) *Town {
-	return &Town{
-		Name:   name,
-		Routes: make(map[string]*Route),
+func newNode(name string) *Node {
+	return &Node{
+		Name:  name,
+		Edges: make(map[string]*Edge),
 	}
 }
 
-func newRoute(src, dst *Town, dist int) {
-	src.Routes[dst.Name] = &Route{
+func newEdge(src, dst *Node, dist int) {
+	src.Edges[dst.Name] = &Edge{
 		Src:      src,
 		Dst:      dst,
 		Distance: dist,
 	}
 }
 
-func graphLoader(input string, index map[string]*Town) {
+func graphLoader(input string, index map[string]*Node) {
 	src, dst, dis := input[0], input[1], input[2]
 	distance, _ := strconv.Atoi(string(dis))
 
 	if _, ok := index[string(src)]; !ok {
-		index[string(src)] = newTown(string(src))
+		index[string(src)] = newNode(string(src))
 	}
 
 	if _, ok := index[string(dst)]; !ok {
-		index[string(dst)] = newTown(string(dst))
+		index[string(dst)] = newNode(string(dst))
 	}
 
-	newRoute(index[string(src)], index[string(dst)], distance)
+	newEdge(index[string(src)], index[string(dst)], distance)
 
 }
 
 func main() {
-	allTowns := make(map[string]*Town)
+	allNodes := make(map[string]*Node)
 
 	graphData := string("AB5, BC4, CD8, DC8, DE6, AD5, CE2, EB3, AE7")
 
 	for _, edge := range strings.Split(graphData, ",") {
 		edge := strings.Trim(edge, " ")
-		graphLoader(edge, allTowns)
+		graphLoader(edge, allNodes)
 	}
 
-	allp := make([]*Path, 0)
-	walk(&allp, &Path{Stops: []*Town{allTowns["C"]}}, SkipD)
+	// all := NewPathList()
+	// walk(all, &Path{Nodes: []*Node{allNodes["A"]}}, SkipD)
 
-	// allp := walkr(&Path{Stops: []*Town{allTowns["A"]}}, SkipD)
+	all := walkr(&Path{Nodes: []*Node{allNodes["A"]}}, SkipD)
 
-	fmt.Println("AAL P: ", allp)
-	for i, pth := range allp {
-		fmt.Print(i)
-		PrintPath(pth)
+	for i, pth := range all.Paths {
+		fmt.Print(i, "   ")
+		fmt.Println(pth)
 	}
 
-	np := PathDedup(allp)
-	fmt.Println(allp)
-	fmt.Println(np)
+	// np := PathDedup(allp)
+	fmt.Println(all)
+	//fmt.Println(np)
 
 	// fmt.Println("AAL ddup: ", np)
 	// for i, pth := range np {
