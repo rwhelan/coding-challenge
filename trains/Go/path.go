@@ -2,71 +2,7 @@ package main
 
 import "fmt"
 
-type Path struct {
-	Cost  int
-	Stops []*Town
-}
-
-func (p *Path) CurrentTown() *Town {
-	if len(p.Stops) == 0 {
-		return nil
-	}
-
-	return p.Stops[len(p.Stops)-1]
-}
-
-// type contFunc func(p *Path, next *Town) bool
-
-// func walk(allPaths *[]*Path, p *Path, f contFunc) {
-// 	for _, r := range p.CurrentTown().Routes {
-// 		if f(p, r.Dst) {
-// 			np := &Path{
-// 				Stops: append(p.Stops, r.Dst),
-// 				Cost:  p.Cost + r.Distance,
-// 			}
-// 			walk(allPaths, np, f)
-// 		} else {
-// 			*allPaths = append(*allPaths, p)
-// 		}
-// 	}
-// }
-
-// func walkr(p *Path, f contFunc) []*Path {
-// 	var allPaths []*Path
-
-// 	for _, r := range p.CurrentTown().Routes {
-// 		if f(p, r.Dst) {
-// 			np := &Path{
-// 				Stops: append(p.Stops, r.Dst),
-// 				Cost:  p.Cost + r.Distance,
-// 			}
-// 			allPaths = append(allPaths, walkr(np, f)...)
-// 		} else {
-// 			allPaths = append(allPaths, p)
-// 		}
-// 	}
-
-// 	return allPaths
-// }
-
-// func SkipD(p *Path, next *Town) bool {
-// 	if pathContains(p, next) {
-// 		fmt.Println("Currnet: ", p.CurrentTown().Name, "Next: ", next.Name)
-// 		printPath(p)
-// 		fmt.Println("FALSE - Contains\n")
-// 		return false
-// 	}
-// 	if len(p.Stops) >= 10 {
-// 		fmt.Println("Currnet: ", p.CurrentTown().Name, "Next: ", next.Name)
-// 		printPath(p)
-// 		fmt.Println("FALSE - Len\n")
-// 		return false
-// 	}
-
-// 	return true
-// }
-
-func pathContains(p *Path, t *Town) bool {
+func PathContains(p *Path, t *Town) bool {
 	for _, i := range p.Stops {
 		if i == t {
 			return true
@@ -76,93 +12,56 @@ func pathContains(p *Path, t *Town) bool {
 	return false
 }
 
-type contFunc func(p *Path, next *Town) *bool
-
-// func walk(allPaths *[]*Path, p *Path, f contFunc) {
-// 	for _, r := range p.CurrentTown().Routes {
-// 		if f(p, r.Dst) {
-// 			np := &Path{
-// 				Stops: append(p.Stops, r.Dst),
-// 				Cost:  p.Cost + r.Distance,
-// 			}
-// 			walk(allPaths, np, f)
-// 		} else {
-// 			*allPaths = append(*allPaths, p)
-// 		}
-// 	}
-// }
-
-func walkr(p *Path, f contFunc) []*Path {
-	allPaths := []*Path{}
-
-	for _, r := range p.CurrentTown().Routes {
-		cont := f(p, r.Dst)
-		if cont == nil {
+func PathDedup(allPaths []*Path) []*Path {
+	for i, p := range allPaths {
+		if p == nil {
 			continue
 		}
-
-		if *cont {
-			np := &Path{
-				Stops: append(p.Stops, r.Dst),
-				Cost:  p.Cost + r.Distance,
+		for x, y := range allPaths[i+1:] {
+			if y == nil {
+				continue
 			}
-			allPaths = append(allPaths, walkr(np, f)...)
-
-		} else {
-			allPaths = append(allPaths, p)
-		}
-	}
-
-	return allPaths
-}
-
-func walk(allPaths *[]*Path, p *Path, f contFunc) {
-	for _, r := range p.CurrentTown().Routes {
-		cont := f(p, r.Dst)
-		if cont == nil {
-			continue
-		}
-
-		if *cont {
-			np := &Path{
-				Stops: append(p.Stops, r.Dst),
-				Cost:  p.Cost + r.Distance,
+			n := x + i + 1
+			if PathsEqual(p, y) {
+				allPaths[n] = nil
 			}
-			walk(allPaths, np, f)
-
-		} else {
-			*allPaths = append(*allPaths, p)
-
 		}
 	}
-}
 
-func SkipD(p *Path, next *Town) *bool {
-	if len(p.Stops) == 1 {
-		return PathContinue()
+	n := make([]*Path, 0)
+	for _, p := range allPaths {
+		if p != nil {
+			n = append(n, p)
+		}
 	}
-	if p.Cost >= 30 {
-		return PathDrop()
+	return n
+}
+
+func PathsEqual(x, y *Path) bool {
+	if len(x.Stops) != len(y.Stops) {
+		return false
 	}
-	fmt.Println(p.CurrentTown().Name, next.Name)
-	printPath(p)
-	if p.CurrentTown().Name == "C" {
-		return PathStop()
+
+	for i := 0; i < len(x.Stops)-1; i++ {
+		if x.Stops[i] != y.Stops[i] {
+			return false
+		}
 	}
 
-	return PathContinue()
+	// Assert Path Costs
+	if x.Cost != y.Cost {
+		PrintPath(x)
+		PrintPath(y)
+		panic("COSTS SHOULD MATCH")
+	}
+
+	return true
 }
 
-func PathContinue() *bool {
-	t := true
-	return &t
-}
+func PrintPath(path *Path) {
+	for _, t := range path.Stops {
+		fmt.Printf(" => %s", (*t).Name)
+	}
 
-func PathStop() *bool {
-	t := false
-	return &t
-}
-
-func PathDrop() *bool {
-	return nil
+	fmt.Printf("   Cost: %d\n", path.Cost)
 }
