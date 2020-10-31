@@ -96,28 +96,26 @@ func (g *Graph) CalculatePath(route []string) (*Path, error) {
 
 }
 
-func (g *Graph) FindPaths(start, end *Node, max int) (*PathList, error) {
-	walkFunction := func(p *Path, next *Node) *bool {
-		var resp bool
-
-		if len(p.Nodes) == 1 {
-			resp = true
-			return &resp
+func (g *Graph) FindAllPaths(start, end *Node, min, max int) (*PathList, error) {
+	walkFunction := func(p *Path, next *Node) WalkerInstruction {
+		if len(p.Nodes) <= min+1 {
+			return PATH_CONTINUE
 		}
 
-		fmt.Println("END: ", end.Name)
 		if p.CurrentNode().Name == end.Name {
-			resp = false
-			return &resp
+			return PATH_STOP
 		}
 
 		// The start node counts to the total - add 1
 		if len(p.Nodes) >= max+1 {
-			return nil
+			return PATH_DROP
 		}
 
-		resp = true
-		return &resp
+		return PATH_CONTINUE
+	}
+
+	if min > max {
+		return nil, fmt.Errorf(fmt.Sprintf("min value of %d is larger than max value of %d", min, max))
 	}
 
 	startNode := g.GetNode(start.Name)
@@ -133,6 +131,100 @@ func (g *Graph) FindPaths(start, end *Node, max int) (*PathList, error) {
 
 	pl := NewPathList()
 	walk(pl, &Path{Nodes: []*Node{startNode}}, walkFunction)
+
+	return pl, nil
+}
+
+func (g *Graph) FindShortestPath(start, end *Node, max int) (*Path, error) {
+	walkFunction := func(p *Path, next *Node) WalkerInstruction {
+		if len(p.Nodes) == 1 {
+			return PATH_CONTINUE
+		}
+
+		if p.CurrentNode().Name == end.Name {
+			return PATH_STOP
+		}
+
+		// The start node counts to the total - add 1
+		if len(p.Nodes) >= max+1 {
+			return PATH_DROP
+		}
+
+		return PATH_CONTINUE
+	}
+
+	startNode := g.GetNode(start.Name)
+	endNode := g.GetNode(end.Name)
+
+	if startNode == nil {
+		return nil, fmt.Errorf("start node not found in graph")
+	}
+
+	if endNode == nil {
+		return nil, fmt.Errorf("end node not found in graph")
+	}
+
+	pl := NewPathList()
+	walk(pl, &Path{Nodes: []*Node{startNode}}, walkFunction)
+
+	if len(pl.Paths) == 0 {
+		return nil, fmt.Errorf("no path could be found between node %s and node %s", startNode.Name, endNode.Name)
+	}
+
+	path := &Path{}
+	shortest := max
+
+	for _, p := range pl.Paths {
+		if p.Cost < shortest {
+			shortest = p.Cost
+			path = p
+		}
+	}
+
+	return path, nil
+}
+
+func (g *Graph) FindAllPathsByDistance(start, end *Node, min, max int) (*PathList, error) {
+	walkFunction := func(p *Path, next *Node) WalkerInstruction {
+		if len(p.Nodes) == 1 || p.Cost < min {
+			return PATH_CONTINUE
+		}
+
+		if p.Cost >= max {
+			return PATH_DROP
+		}
+
+		if p.CurrentNode().Name == end.Name {
+			return PATH_COPY
+		}
+
+		// if p.CurrentNode().Name == end.Name && p.Cost >= max {
+		// 	return PATH_STOP
+
+		// }
+		// The start node counts to the total - add 1
+
+		return PATH_CONTINUE
+	}
+
+	if min > max {
+		return nil, fmt.Errorf(fmt.Sprintf("min value of %d is larger than max value of %d", min, max))
+	}
+
+	startNode := g.GetNode(start.Name)
+	endNode := g.GetNode(end.Name)
+
+	if startNode == nil {
+		return nil, fmt.Errorf("start node not found in graph")
+	}
+
+	if endNode == nil {
+		return nil, fmt.Errorf("end node not found in graph")
+	}
+
+	pl := NewPathList()
+	walk(pl, &Path{Nodes: []*Node{startNode}}, walkFunction)
+	pl.Dedup()
 
 	return pl, nil
 }

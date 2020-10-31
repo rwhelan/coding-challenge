@@ -22,11 +22,15 @@ func main() {
 	// }
 
 	startNode := g.GetNode("C")
-	pl, err := g.FindPaths(startNode, startNode, 3)
+	endNode := g.GetNode("C")
+	pl, err := g.FindAllPathsByDistance(startNode, endNode, 0, 30)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(pl)
+
+	for _, p := range pl.Paths {
+		fmt.Println(p)
+	}
 }
 
 /////////////////////////////////////////////////////////////////

@@ -4,7 +4,16 @@ import (
 	"fmt"
 )
 
-type contFunc func(p *Path, next *Node) *bool
+type WalkerInstruction uint
+
+const (
+	PATH_CONTINUE WalkerInstruction = iota
+	PATH_STOP
+	PATH_DROP
+	PATH_COPY
+)
+
+type contFunc func(p *Path, next *Node) WalkerInstruction
 
 func Walk(g *Graph, start *Node, f contFunc) (*PathList, error) {
 	pl := NewPathList()
@@ -22,26 +31,29 @@ func walkr(p *Path, f contFunc) *PathList {
 	all := NewPathList()
 
 	for _, e := range p.CurrentNode().Edges {
-		cont := f(p, e.Dst)
-		if cont == nil {
+		switch f(p, e.Dst) {
+		case PATH_DROP:
 			continue
-		}
 
-		if *cont {
-			np := &Path{
-				Nodes: append(p.Nodes, e.Dst),
-				Edges: append(p.Edges, e),
-				Cost:  p.Cost + e.Distance,
-			}
-			all.Add(walkr(np, f))
-
-		} else {
+		case PATH_STOP:
 			// Dedup
 			if all.Len() == 0 ||
 				all.Len() >= 1 &&
 					!(all.Last() == p) {
 				all.Append(p)
 			}
+
+		case PATH_COPY:
+			all.Paths = append(all.Paths, p)
+			fallthrough
+
+		case PATH_CONTINUE:
+			np := &Path{
+				Nodes: append(p.Nodes, e.Dst),
+				Edges: append(p.Edges, e),
+				Cost:  p.Cost + e.Distance,
+			}
+			all.Add(walkr(np, f))
 		}
 	}
 
@@ -50,12 +62,23 @@ func walkr(p *Path, f contFunc) *PathList {
 
 func walk(all *PathList, p *Path, f contFunc) {
 	for _, e := range p.CurrentNode().Edges {
-		cont := f(p, e.Dst)
-		if cont == nil {
+		switch f(p, e.Dst) {
+		case PATH_DROP:
 			continue
-		}
 
-		if *cont {
+		case PATH_STOP:
+			// Dedup
+			if all.Len() == 0 ||
+				all.Len() >= 1 &&
+					!(all.Last() == p) {
+				all.Append(p)
+			}
+
+		case PATH_COPY:
+			all.Paths = append(all.Paths, p)
+			fallthrough
+
+		case PATH_CONTINUE:
 			np := &Path{
 				Nodes: append(p.Nodes, e.Dst),
 				Edges: append(p.Edges, e),
@@ -63,13 +86,6 @@ func walk(all *PathList, p *Path, f contFunc) {
 			}
 			walk(all, np, f)
 
-		} else {
-			// Dedup
-			if all.Len() == 0 ||
-				all.Len() >= 1 &&
-					!(all.Last() == p) {
-				all.Append(p)
-			}
 		}
 	}
 }
