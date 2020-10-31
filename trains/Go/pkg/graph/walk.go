@@ -44,7 +44,11 @@ func walkr(p *Path, f contFunc) *PathList {
 			}
 
 		case PATH_COPY:
-			all.Paths = append(all.Paths, p)
+			if all.Len() == 0 ||
+				all.Len() >= 1 &&
+					!(all.Last() == p) {
+				all.Append(p)
+			}
 			fallthrough
 
 		case PATH_CONTINUE:
@@ -75,7 +79,11 @@ func walk(all *PathList, p *Path, f contFunc) {
 			}
 
 		case PATH_COPY:
-			all.Paths = append(all.Paths, p)
+			if all.Len() == 0 ||
+				all.Len() >= 1 &&
+					!(all.Last() == p) {
+				all.Append(p)
+			}
 			fallthrough
 
 		case PATH_CONTINUE:
