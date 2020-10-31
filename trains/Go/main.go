@@ -32,33 +32,3 @@ func main() {
 		fmt.Println(p)
 	}
 }
-
-/////////////////////////////////////////////////////////////////
-func SkipD(p *graph.Path, next *graph.Node) *bool {
-	if len(p.Nodes) == 1 {
-		return PathContinue()
-	}
-	if p.Cost >= 30 {
-		return PathDrop()
-	}
-
-	if p.CurrentNode().Name == "C" {
-		return PathStop()
-	}
-
-	return PathContinue()
-}
-
-func PathContinue() *bool {
-	t := true
-	return &t
-}
-
-func PathStop() *bool {
-	t := false
-	return &t
-}
-
-func PathDrop() *bool {
-	return nil
-}
