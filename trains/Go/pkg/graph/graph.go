@@ -225,5 +225,7 @@ func (g *Graph) FindAllPathsByDistance(start, end *Node, min, max int) (*PathLis
 	pl := NewPathList()
 	walk(pl, &Path{Nodes: []*Node{startNode}}, walkFunction)
 
+	pl.Dedup()
+
 	return pl, nil
 }

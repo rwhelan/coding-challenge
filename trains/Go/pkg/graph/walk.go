@@ -47,7 +47,8 @@ func walkr(p *Path, f contFunc) *PathList {
 			if all.Len() == 0 ||
 				all.Len() >= 1 &&
 					!(all.Last() == p) {
-				all.Append(p)
+
+				all.Append(p.Duplicate())
 			}
 			fallthrough
 
@@ -82,11 +83,13 @@ func walk(all *PathList, p *Path, f contFunc) {
 			if all.Len() == 0 ||
 				all.Len() >= 1 &&
 					!(all.Last() == p) {
-				all.Append(p)
+
+				all.Append(p.Duplicate())
 			}
 			fallthrough
 
 		case PATH_CONTINUE:
+
 			np := &Path{
 				Nodes: append(p.Nodes, e.Dst),
 				Edges: append(p.Edges, e),

@@ -116,8 +116,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	pl.Dedup()
-
 	fmt.Printf("Output #10: %d\n", pl.Len())
-
 }

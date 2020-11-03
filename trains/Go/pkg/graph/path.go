@@ -39,6 +39,18 @@ func (p *Path) CurrentNode() *Node {
 	return p.Nodes[len(p.Nodes)-1]
 }
 
+func (p Path) Duplicate() *Path {
+	n := &Path{
+		Cost:  p.Cost,
+		Nodes: make([]*Node, len(p.Nodes)),
+		Edges: make([]*Edge, len(p.Edges)),
+	}
+	copy(n.Nodes, p.Nodes)
+	copy(n.Edges, p.Edges)
+
+	return n
+}
+
 type PathList struct {
 	Paths []*Path
 }
