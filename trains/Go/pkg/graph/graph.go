@@ -145,6 +145,13 @@ func (g *Graph) FindShortestPath(start, end *Node, max int) (*Path, error) {
 			return PATH_STOP
 		}
 
+		// p.Nodes[1:] allows round trips
+		for _, n := range p.Nodes[1:] {
+			if next.Name == n.Name {
+				return PATH_DROP
+			}
+		}
+
 		// The start node counts to the total - add 1
 		if len(p.Nodes) >= max+1 {
 			return PATH_DROP

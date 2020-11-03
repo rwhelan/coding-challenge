@@ -39,14 +39,14 @@ func walkr(p *Path, f contFunc) *PathList {
 			// Dedup
 			if all.Len() == 0 ||
 				all.Len() >= 1 &&
-					!(all.Last() == p) {
-				all.Append(p)
+					!(PathsEqual(all.Last(), p)) {
+				all.Append(p.Duplicate())
 			}
 
 		case PATH_COPY:
 			if all.Len() == 0 ||
 				all.Len() >= 1 &&
-					!(all.Last() == p) {
+					!(PathsEqual(all.Last(), p)) {
 
 				all.Append(p.Duplicate())
 			}
@@ -75,14 +75,14 @@ func walk(all *PathList, p *Path, f contFunc) {
 			// Dedup
 			if all.Len() == 0 ||
 				all.Len() >= 1 &&
-					!(all.Last() == p) {
-				all.Append(p)
+					!(PathsEqual(all.Last(), p)) {
+				all.Append(p.Duplicate())
 			}
 
 		case PATH_COPY:
 			if all.Len() == 0 ||
 				all.Len() >= 1 &&
-					!(all.Last() == p) {
+					!(PathsEqual(all.Last(), p)) {
 
 				all.Append(p.Duplicate())
 			}
