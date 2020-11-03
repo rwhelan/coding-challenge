@@ -24,7 +24,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Output #1: %d\n", path.Cost)
+	fmt.Printf("Output #1: (9) %d\n", path.Cost)
 
 	// 2.) The distance of the route A-D.
 	path, err = g.CalculatePath([]string{"A", "D"})
@@ -32,7 +32,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Output #2: %d\n", path.Cost)
+	fmt.Printf("Output #2: (5) %d\n", path.Cost)
 
 	// 3.) The distance of the route A-D-C.
 	path, err = g.CalculatePath([]string{"A", "D", "C"})
@@ -40,7 +40,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Output #3: %d\n", path.Cost)
+	fmt.Printf("Output #3: (13) %d\n", path.Cost)
 
 	// 4.) The distance of the route A-E-B-C-D.
 	path, err = g.CalculatePath([]string{"A", "E", "B", "C", "D"})
@@ -48,7 +48,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Output #4: %d\n", path.Cost)
+	fmt.Printf("Output #4: (22) %d\n", path.Cost)
 
 	// 5.) The distance of the route A-E-D.
 	if _, err = g.CalculatePath([]string{"A", "E", "C"}); err != nil {
@@ -70,7 +70,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Output #6: %d\n", pl.Len())
+	fmt.Printf("Output #6: (2) %d\n", pl.Len())
 
 	// 7.) The number of trips starting at A and ending at C with exactly 4
 	//     stops. In the sample data below, there are three such trips:
@@ -82,7 +82,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Output #7: %d\n", pl.Len())
+	fmt.Printf("Output #7: (3) %d\n", pl.Len())
 
 	// 8.) The length of the shortest route (in terms of distance to travel)
 	//     from A to C.
@@ -93,7 +93,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Output #8: %d\n", path.Cost)
+	fmt.Printf("Output #8: (9) %d\n", path.Cost)
 
 	// 9.) The length of the shortest route (in terms of distance to travel)
 	//     from B to B.
@@ -104,7 +104,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Output #9: %d\n", path.Cost)
+	fmt.Printf("Output #9: (9) %d\n", path.Cost)
 
 	// 10.) The number of different routes from C to C with a distance of less
 	//      than 30. In the sample data, the trips are:
@@ -116,5 +116,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Output #10: %d\n", pl.Len())
+	fmt.Printf("Output #10: (7) %d\n", pl.Len())
 }
