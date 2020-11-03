@@ -51,6 +51,47 @@ func (p Path) Duplicate() *Path {
 	return n
 }
 
+func PathsEqual(x, y *Path) bool {
+	if len(x.Nodes) != len(y.Nodes) {
+		return false
+	}
+
+	if len(x.Edges) != len(y.Edges) {
+		return false
+	}
+
+	for i := 0; i < len(x.Nodes)-1; i++ {
+		if x.Nodes[i] != y.Nodes[i] {
+			return false
+		}
+	}
+
+	for i := 0; i < len(x.Edges)-1; i++ {
+		if x.Edges[i] != y.Edges[i] {
+			return false
+		}
+	}
+
+	// Assert Path Costs
+	if x.Cost != y.Cost {
+		fmt.Println(x)
+		fmt.Println(y)
+		panic("COSTS SHOULD MATCH")
+	}
+
+	return true
+}
+
+func PathContains(p *Path, t *Node) bool {
+	for _, i := range p.Nodes {
+		if i == t {
+			return true
+		}
+	}
+
+	return false
+}
+
 type PathList struct {
 	Paths []*Path
 }
@@ -60,6 +101,7 @@ func NewPathList() *PathList {
 		Paths: []*Path{},
 	}
 }
+
 func (p *PathList) Len() int {
 	return len(p.Paths)
 }
@@ -107,78 +149,3 @@ func (pl *PathList) Dedup() {
 
 	pl.Paths = n
 }
-
-func PathsEqual(x, y *Path) bool {
-	if len(x.Nodes) != len(y.Nodes) {
-		return false
-	}
-
-	for i := 0; i < len(x.Nodes)-1; i++ {
-		if x.Nodes[i] != y.Nodes[i] {
-			return false
-		}
-	}
-
-	// Assert Path Costs
-	if x.Cost != y.Cost {
-		fmt.Println(x)
-		fmt.Println(y)
-		panic("COSTS SHOULD MATCH")
-	}
-
-	return true
-}
-
-func PathContains(p *Path, t *Node) bool {
-	for _, i := range p.Nodes {
-		if i == t {
-			return true
-		}
-	}
-
-	return false
-}
-
-// func PathDedup(allPaths []*Path) []*Path {
-// 	for i, p := range allPaths {
-// 		if p == nil {
-// 			continue
-// 		}
-// 		for x, y := range allPaths[i+1:] {
-// 			if y == nil {
-// 				continue
-// 			}
-// 			n := x + i + 1
-// 			if PathsEqual(p, y) {
-// 				allPaths[n] = nil
-// 			}
-// 		}
-// 	}
-
-// 	n := make([]*Path, 0)
-// 	for _, p := range allPaths {
-// 		if p != nil {
-// 			n = append(n, p)
-// 		}
-// 	}
-// 	return n
-// }
-
-// func PrintPath(path *Path) {
-// 	s := strings.Builder{}
-
-// 	for i := 0; i < len(path.Nodes); i++ {
-// 		s.WriteString(path.Nodes[i].Name)
-// 		if len(path.Nodes)-1 != i {
-// 			s.WriteString(" ==(")
-// 		}
-// 		if (len(path.Edges) - 1) >= i {
-// 			s.WriteString(strconv.Itoa(path.Edges[i].Distance))
-// 			s.WriteString(")==> ")
-// 		}
-// 	}
-
-// 	s.WriteString(" : ")
-// 	s.WriteString(strconv.Itoa(path.Cost))
-// 	fmt.Println(s.String())
-// }
