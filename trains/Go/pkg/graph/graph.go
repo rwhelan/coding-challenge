@@ -138,25 +138,30 @@ func (g *Graph) FindAllPaths(start, end *Node, min, max int) (*PathList, error) 
 func (g *Graph) FindShortestPath(start, end *Node, max int) (*Path, error) {
 	walkFunction := func(p *Path, next *Node) WalkerInstruction {
 		if len(p.Nodes) == 1 {
+			fmt.Println("CONT 1")
 			return PATH_CONTINUE
 		}
 
 		if p.CurrentNode().Name == end.Name {
+			fmt.Println("STOP")
 			return PATH_STOP
 		}
 
 		// p.Nodes[1:] allows round trips
 		for _, n := range p.Nodes[1:] {
 			if next.Name == n.Name {
+				fmt.Println("DROP 1")
 				return PATH_DROP
 			}
 		}
 
 		// The start node counts to the total - add 1
 		if len(p.Nodes) >= max+1 {
+			fmt.Println("DROP 2")
 			return PATH_DROP
 		}
 
+		fmt.Println("CONT 2")
 		return PATH_CONTINUE
 	}
 

@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/rwhelan/coding-challenge/trains/Go/pkg/graph"
@@ -114,28 +115,29 @@ func TestGraphCalculatePath(t *testing.T) {
 }
 
 func TestGraphFindShortestPath(t *testing.T) {
-	testGraph := simpleGraph()
-	nodeA := testGraph.GetNode("A")
-	nodeE := testGraph.GetNode("E")
+	// testGraph := simpleGraph()
+	//	nodeA := testGraph.GetNode("A")
+	// nodeE := testGraph.GetNode("E")
+	// nodeF := testGraph.GetNode("F")
 
-	nodeA.AddEdge(nodeE, 1)
+	//	nodeA.AddEdge(nodeE, 1)
 	//    _________________
 	//   /                 \
 	//  A - 1 - B - 2 - C   1
 	//           \           \
 	//            3 - D - 4 - E - 5 - F
 	//
-	path, err := testGraph.CalculatePath([]string{"A", "B", "D", "E", "F"})
+
+	// fmt.Printf("%+v\n", nodeE.Edges["F"].Dst)
+
+	gdata := string("AB1, BC2, BD3, DE4, EF5")
+	g := graph.NewGraph("Test")
+	err := g.InitFromCommaString(gdata)
+
+	path, err := g.FindShortestPath(g.GetNode("E"), g.GetNode("F"), 300)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if path.Cost != 13 {
-		t.Fatal("graph.CalculatePath() bad cost value")
-	}
-
-	_, err = testGraph.CalculatePath([]string{"A", "B", "D", "E", "F", "A"})
-	if err == nil {
-		t.Fatal("graph.CalculatePath() expected err on bad path")
-	}
+	fmt.Println(path)
 }
