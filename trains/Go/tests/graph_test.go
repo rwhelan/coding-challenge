@@ -6,6 +6,36 @@ import (
 	"github.com/rwhelan/coding-challenge/trains/Go/pkg/graph"
 )
 
+func simpleGraph() *graph.Graph {
+	//
+	//  A - 1 - B - 2 - C
+	//           \
+	//            3 - D - 4 - E - 5 - F
+	//
+	testGraph := graph.NewGraph("TestGraph")
+
+	nodeA := graph.NewNode("A")
+	nodeB := graph.NewNode("B")
+	nodeC := graph.NewNode("C")
+	nodeD := graph.NewNode("D")
+	nodeE := graph.NewNode("E")
+	nodeF := graph.NewNode("F")
+
+	testGraph.AddNode(nodeA)
+	testGraph.AddNode(nodeB)
+	testGraph.AddNode(nodeC)
+	testGraph.AddNode(nodeD)
+	testGraph.AddNode(nodeE)
+	testGraph.AddNode(nodeF)
+
+	nodeA.AddEdge(nodeB, 1)
+	nodeB.AddEdge(nodeC, 2)
+	nodeB.AddEdge(nodeD, 3)
+	nodeD.AddEdge(nodeE, 4)
+	nodeE.AddEdge(nodeF, 5)
+
+	return testGraph
+}
 func TestGraphInitFromCommaString(t *testing.T) {
 	graphData := string("AB1, BC2, BD3")
 
@@ -66,28 +96,35 @@ func TestGraphInitFromCommaString(t *testing.T) {
 }
 
 func TestGraphCalculatePath(t *testing.T) {
-	testGraph := graph.NewGraph("TestGraph")
+	testGraph := simpleGraph()
 
-	nodeA := graph.NewNode("A")
-	nodeB := graph.NewNode("B")
-	nodeC := graph.NewNode("C")
-	nodeD := graph.NewNode("D")
-	nodeE := graph.NewNode("E")
-	nodeF := graph.NewNode("F")
+	path, err := testGraph.CalculatePath([]string{"A", "B", "D", "E", "F"})
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	testGraph.AddNode(nodeA)
-	testGraph.AddNode(nodeB)
-	testGraph.AddNode(nodeC)
-	testGraph.AddNode(nodeD)
-	testGraph.AddNode(nodeE)
-	testGraph.AddNode(nodeF)
+	if path.Cost != 13 {
+		t.Fatal("graph.CalculatePath() bad cost value")
+	}
 
-	nodeA.AddEdge(nodeB, 1)
-	nodeB.AddEdge(nodeC, 2)
-	nodeB.AddEdge(nodeD, 3)
-	nodeD.AddEdge(nodeE, 4)
-	nodeE.AddEdge(nodeF, 5)
+	_, err = testGraph.CalculatePath([]string{"A", "B", "D", "E", "F", "A"})
+	if err == nil {
+		t.Fatal("graph.CalculatePath() expected err on bad path")
+	}
+}
 
+func TestGraphFindShortestPath(t *testing.T) {
+	testGraph := simpleGraph()
+	nodeA := testGraph.GetNode("A")
+	nodeE := testGraph.GetNode("E")
+
+	nodeA.AddEdge(nodeE, 1)
+	//    _________________
+	//   /                 \
+	//  A - 1 - B - 2 - C   1
+	//           \           \
+	//            3 - D - 4 - E - 5 - F
+	//
 	path, err := testGraph.CalculatePath([]string{"A", "B", "D", "E", "F"})
 	if err != nil {
 		t.Fatal(err)
