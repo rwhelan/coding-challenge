@@ -1,26 +1,23 @@
-package tests
+package graph
 
 import (
-	"fmt"
 	"testing"
-
-	"github.com/rwhelan/coding-challenge/trains/Go/pkg/graph"
 )
 
-func simpleGraph() *graph.Graph {
+func simpleGraph() *Graph {
 	//
 	//  A - 1 - B - 2 - C
 	//           \
 	//            3 - D - 4 - E - 5 - F
 	//
-	testGraph := graph.NewGraph("TestGraph")
+	testGraph := NewGraph("TestGraph")
 
-	nodeA := graph.NewNode("A")
-	nodeB := graph.NewNode("B")
-	nodeC := graph.NewNode("C")
-	nodeD := graph.NewNode("D")
-	nodeE := graph.NewNode("E")
-	nodeF := graph.NewNode("F")
+	nodeA := NewNode("A")
+	nodeB := NewNode("B")
+	nodeC := NewNode("C")
+	nodeD := NewNode("D")
+	nodeE := NewNode("E")
+	nodeF := NewNode("F")
 
 	testGraph.AddNode(nodeA)
 	testGraph.AddNode(nodeB)
@@ -40,7 +37,7 @@ func simpleGraph() *graph.Graph {
 func TestGraphInitFromCommaString(t *testing.T) {
 	graphData := string("AB1, BC2, BD3")
 
-	g := graph.NewGraph("Test")
+	g := NewGraph("Test")
 	err := g.InitFromCommaString(graphData)
 	if err != nil {
 		t.Fatal(err)
@@ -115,12 +112,12 @@ func TestGraphCalculatePath(t *testing.T) {
 }
 
 func TestGraphFindShortestPath(t *testing.T) {
-	// testGraph := simpleGraph()
-	//	nodeA := testGraph.GetNode("A")
-	// nodeE := testGraph.GetNode("E")
-	// nodeF := testGraph.GetNode("F")
+	testGraph := simpleGraph()
+	nodeA := testGraph.GetNode("A")
+	nodeE := testGraph.GetNode("E")
+	nodeF := testGraph.GetNode("F")
 
-	//	nodeA.AddEdge(nodeE, 1)
+	nodeA.AddEdge(nodeE, 1)
 	//    _________________
 	//   /                 \
 	//  A - 1 - B - 2 - C   1
@@ -128,16 +125,64 @@ func TestGraphFindShortestPath(t *testing.T) {
 	//            3 - D - 4 - E - 5 - F
 	//
 
-	// fmt.Printf("%+v\n", nodeE.Edges["F"].Dst)
-
-	gdata := string("AB1, BC2, BD3, DE4, EF5")
-	g := graph.NewGraph("Test")
-	err := g.InitFromCommaString(gdata)
-
-	path, err := g.FindShortestPath(g.GetNode("E"), g.GetNode("F"), 300)
+	path, err := testGraph.FindShortestPath(nodeA, nodeF, 300)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fmt.Println(path)
+	if path.Nodes[0].Name != "A" {
+		t.Fatal("graph.FindShortestPath() invalid response: Node A")
+	}
+
+	if path.Nodes[1].Name != "E" {
+		t.Fatal("graph.FindShortestPath() invalid response: Node E")
+	}
+
+	if path.Nodes[2].Name != "F" {
+		t.Fatal("graph.FindShortestPath() invalid response: Node F")
+	}
+
+	if path.Nodes[0].Edges["E"].Dst != nodeE {
+		t.Fatal("graph.FindShortestPath() invalid response: Edge A-E")
+	}
+
+	if path.Nodes[1].Edges["F"].Dst != nodeF {
+		t.Fatal("graph.FindShortestPath() invalid response: Edge E-F")
+	}
+
+	if path.Nodes[0].Edges["E"].Distance != 1 {
+		t.Fatal("graph.FindShortestPath() invalid response: Edge A-E Distance")
+	}
+
+	if path.Nodes[1].Edges["F"].Distance != 5 {
+		t.Fatal("graph.FindShortestPath() invalid response: Edge E-F Distance")
+	}
+}
+
+func TestGraphFindAllPaths(t *testing.T) {
+	testGraph := simpleGraph()
+	nodeA := testGraph.GetNode("A")
+	nodeC := testGraph.GetNode("C")
+	nodeF := testGraph.GetNode("F")
+
+	nodeG := NewNode("G")
+	testGraph.AddNode(nodeG)
+
+	nodeC.AddEdge(nodeG, 6)
+	nodeG.AddEdge(nodeF, 7)
+
+	//
+	//  A - 1 - B - 2 - C - 6 - G - 7
+	//           \                   \
+	//            3 - D - 4 - E - 5 - F
+	//
+
+	pl, err := testGraph.FindAllPaths(nodeA, nodeF, 1, 30)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if pl.Len() != 2 {
+		t.Fatal("graph.FindAllPaths() returns unexpected number of paths")
+	}
 }

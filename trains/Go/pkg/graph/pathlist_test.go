@@ -1,13 +1,11 @@
-package tests
+package graph
 
 import (
 	"testing"
-
-	"github.com/rwhelan/coding-challenge/trains/Go/pkg/graph"
 )
 
 func TestPathList(t *testing.T) {
-	testPathList := graph.NewPathList()
+	testPathList := NewPathList()
 
 	if testPathList.Last() != nil {
 		t.Fatal("empty PathList.Last() returned non-nil")
@@ -25,7 +23,7 @@ func TestPathList(t *testing.T) {
 }
 
 func TestPathListDedup(t *testing.T) {
-	testPathList := graph.NewPathList()
+	testPathList := NewPathList()
 
 	testPathOne := generateSimplePath()
 	testPathTwo := generateSimplePath()

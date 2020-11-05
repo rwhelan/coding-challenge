@@ -1,18 +1,53 @@
-package tests
+package graph
 
 import (
 	"testing"
-
-	"github.com/rwhelan/coding-challenge/trains/Go/pkg/graph"
 )
 
-func TestPathCurrentNode(t *testing.T) {
-	nOne := graph.NewNode("One")
-	nTwo := graph.NewNode("Two")
-	nThree := graph.NewNode("Three")
+func generateSimplePath() *Path {
+	// One - 2 - Two - 4 - Three
+	nOne := NewNode("One")
+	nTwo := NewNode("Two")
+	nThree := NewNode("Three")
 
-	testPath := &graph.Path{
-		Nodes: []*graph.Node{
+	eOne := &Edge{
+		Src:      nOne,
+		Dst:      nTwo,
+		Distance: 2,
+	}
+
+	eTwo := &Edge{
+		Src:      nTwo,
+		Dst:      nThree,
+		Distance: 4,
+	}
+
+	nOne.Edges["Two"] = eOne
+	nTwo.Edges["Three"] = eTwo
+
+	testPath := &Path{
+		Nodes: []*Node{
+			nOne, nTwo, nThree,
+		},
+		Edges: []*Edge{
+			eOne, eTwo,
+		},
+	}
+
+	for _, e := range testPath.Edges {
+		testPath.Cost += e.Distance
+	}
+
+	return testPath
+}
+
+func TestPathCurrentNode(t *testing.T) {
+	nOne := NewNode("One")
+	nTwo := NewNode("Two")
+	nThree := NewNode("Three")
+
+	testPath := &Path{
+		Nodes: []*Node{
 			nOne, nTwo, nThree,
 		},
 	}
@@ -54,20 +89,20 @@ func TestPathDuplicate(t *testing.T) {
 
 func TestPathEqual(t *testing.T) {
 	testPath := generateSimplePath()
-	test2Path := &graph.Path{
+	test2Path := &Path{
 		Cost:  testPath.Cost,
-		Nodes: make([]*graph.Node, len(testPath.Nodes)),
-		Edges: make([]*graph.Edge, len(testPath.Edges)),
+		Nodes: make([]*Node, len(testPath.Nodes)),
+		Edges: make([]*Edge, len(testPath.Edges)),
 	}
 
 	copy(test2Path.Nodes, testPath.Nodes)
 	copy(test2Path.Edges, testPath.Edges)
 
-	if !graph.PathsEqual(testPath, test2Path) {
+	if !PathsEqual(testPath, test2Path) {
 		t.Fatal("PathEqual() failed equal")
 	}
 
-	if graph.PathsEqual(testPath, generateSimplePath()) {
+	if PathsEqual(testPath, generateSimplePath()) {
 		t.Fatal("PathEqual() non-equal equal")
 	}
 }
@@ -76,11 +111,11 @@ func TestPathContains(t *testing.T) {
 	testPath := generateSimplePath()
 	testNode := testPath.Nodes[1]
 
-	if !graph.PathContains(testPath, testNode) {
+	if !PathContains(testPath, testNode) {
 		t.Fatal("PathContains() failed to match")
 	}
 
-	if graph.PathContains(testPath, graph.NewNode("Three")) {
+	if PathContains(testPath, NewNode("Three")) {
 		t.Fatal("PathContains() found non-match")
 	}
 }
