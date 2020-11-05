@@ -8,7 +8,7 @@ import (
 
 type Graph struct {
 	Name  *string
-	nodes map[string]*Node `json:"Nodes"`
+	nodes map[string]*Node
 }
 
 func NewGraph(name string) *Graph {
