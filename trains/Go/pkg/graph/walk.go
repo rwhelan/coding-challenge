@@ -24,6 +24,8 @@ func (g *Graph) Walk(start *Node, f contFunc) (*PathList, error) {
 	pl := NewPathList()
 	walk(pl, &Path{Nodes: []*Node{startNode}}, f)
 
+	pl.Dedup()
+
 	return pl, nil
 }
 
