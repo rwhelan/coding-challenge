@@ -12,15 +12,6 @@ func NewNode(name string) *Node {
 	}
 }
 
-func (n *Node) EdgeList() []*Edge {
-	Edges := make([]*Edge, 0, len(n.Edges))
-	for _, r := range n.Edges {
-		Edges = append(Edges, r)
-	}
-
-	return Edges
-}
-
 func (n *Node) AddEdge(on *Node, dis int) {
 	e := &Edge{
 		Src:      n,

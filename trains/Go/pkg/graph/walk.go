@@ -15,22 +15,35 @@ const (
 
 type contFunc func(p *Path, next *Node) WalkerInstruction
 
-func Walk(g *Graph, start *Node, f contFunc) (*PathList, error) {
-	pl := NewPathList()
-	startNode := g.GetNode(start.Name)
-	if startNode == nil {
-		return nil, fmt.Errorf("start node %s not found in graph %s", start.Name, g.Name)
+func (g *Graph) Walk(start *Node, f contFunc) (*PathList, error) {
+	startNode, ok := g.nodes[start.Name]
+	if !ok {
+		return nil, fmt.Errorf("start node %s not found in graph %s", (*start).Name, *g.Name)
 	}
 
+	pl := NewPathList()
 	walk(pl, &Path{Nodes: []*Node{startNode}}, f)
+
+	pl.Dedup()
 
 	return pl, nil
 }
 
 func walkr(p *Path, f contFunc) *PathList {
 	all := NewPathList()
-
-	for _, e := range p.CurrentNode().Edges {
+	edges := p.CurrentNode().Edges
+	if len(edges) == 0 {
+		// leaf node
+		inst := f(p, nil)
+		if inst == PATH_COPY || inst == PATH_STOP {
+			if all.Len() == 0 ||
+				all.Len() >= 1 &&
+					!(PathsEqual(all.Last(), p)) {
+				all.Append(p.Duplicate())
+			}
+		}
+	}
+	for _, e := range edges {
 		switch f(p, e.Dst) {
 		case PATH_DROP:
 			continue
@@ -66,7 +79,20 @@ func walkr(p *Path, f contFunc) *PathList {
 }
 
 func walk(all *PathList, p *Path, f contFunc) {
-	for _, e := range p.CurrentNode().Edges {
+	edges := p.CurrentNode().Edges
+	if len(edges) == 0 {
+		// leaf node
+		inst := f(p, nil)
+		if inst == PATH_COPY || inst == PATH_STOP {
+			if all.Len() == 0 ||
+				all.Len() >= 1 &&
+					!(PathsEqual(all.Last(), p)) {
+				all.Append(p.Duplicate())
+			}
+		}
+	}
+
+	for _, e := range edges {
 		switch f(p, e.Dst) {
 		case PATH_DROP:
 			continue
@@ -89,7 +115,6 @@ func walk(all *PathList, p *Path, f contFunc) {
 			fallthrough
 
 		case PATH_CONTINUE:
-
 			np := &Path{
 				Nodes: append(p.Nodes, e.Dst),
 				Edges: append(p.Edges, e),
