@@ -18,6 +18,10 @@ func NewGraph(name string) *Graph {
 	}
 }
 
+func (g *Graph) AllNodes() map[string]*Node {
+	return g.nodes
+}
+
 func (g *Graph) AddNode(n *Node) {
 	if _, exists := g.nodes[n.Name]; !exists {
 		g.nodes[n.Name] = n
